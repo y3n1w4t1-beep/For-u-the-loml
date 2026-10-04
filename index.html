@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A little website made with love." />
+  <title>For You, My Love</title>
+  <style>
+    :root {
+      --bg: #09050d;
+      --bg2: #150b1b;
+      --card: rgba(27, 13, 34, 0.72);
+      --line: rgba(255, 155, 208, 0.20);
+      --pink: #ff8fc7;
+      --pink2: #ff5fa8;
+      --soft: #f8dce9;
+      --muted: #b89bad;
+      --white: #fff7fb;
+      --shadow: 0 20px 80px rgba(0,0,0,.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      color: var(--white);
+      font-family: "Courier New", monospace;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(255, 92, 171, .14), transparent 28%),
+        radial-gradient(circle at 80% 10%, rgba(173, 100, 255, .13), transparent 28%),
+        linear-gradient(160deg, var(--bg), var(--bg2) 55%, #0a0610);
+      overflow-x: hidden;
+    }
+
+    body.locked { overflow: hidden; }
+    button, input { font: inherit; }
+
+    .hidden { display: none !important; }
+
+    .stars, .hearts-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.7);
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: .15; transform: scale(1); }
+      50% { opacity: .8; transform: scale(1.8); }
+    }
+
+    .floating-heart {
+      position: absolute;
+      bottom: -40px;
+      color: var(--pink);
+      text-shadow: 0 0 12px rgba(255, 95, 168, .7);
+      animation: floatUp 6s linear forwards;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+      10% { opacity: .85; }
+      100% { transform: translateY(-115vh) translateX(var(--drift)) rotate(25deg); opacity: 0; }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 20;
+      display: flex;
+      gap: 10px;
+    }
+
+    .icon-btn, .music-btn {
+      border: 1px solid var(--line);
+      color: var(--soft);
+      background: rgba(15, 8, 18, .72);
+      backdrop-filter: blur(12px);
+      border-radius: 999px;
+      padding: 9px 13px;
+      cursor: pointer;
+      transition: .25s ease;
+    }
+
+    .icon-btn:hover, .music-btn:hover {
+      border-color: rgba(255,143,199,.6);
+      box-shadow: 0 0 25px rgba(255,95,168,.18);
+      transform: translateY(-1px);
+    }
+
+    .screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 35px 18px;
+    }
+
+    .panel {
+      width: min(930px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      padding: clamp(28px, 6vw, 60px);
+    }
+
+    .center { text-align: center; }
+
+    .eyebrow {
+      color: var(--pink);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: Georgia, serif;
+      font-weight: 600;
+      font-size: clamp(42px, 9vw, 84px);
+      line-height: .95;
+      margin-bottom: 18px;
+      text-shadow: 0 0 30px rgba(255,95,168,.20);
+    }
+
+    h2 {
+      font-family: Georgia, serif;
+      font-size: clamp(30px, 5vw, 50px);
+      margin-bottom: 14px;
+    }
+
+    h3 {
+      font-family: Georgia, serif;
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      color: var(--soft);
+      line-height: 1.8;
+      font-family: Arial, sans-serif;
+    }
+
+    .subtext {
+      max-width: 650px;
+      margin: 0 auto 28px;
+      color: var(--muted);
+    }
+
+    .primary-btn, .secondary-btn {
+      border-radius: 999px;
+      padding: 13px 22px;
+      cursor: pointer;
+      transition: .25s ease;
+      border: 1px solid transparent;
+    }
+
+    .primary-btn {
+      color: #180912;
+      background: linear-gradient(135deg, #ffafd4, #ff6fb4);
+      box-shadow: 0 10px 30px rgba(255,95,168,.18);
+    }
+
+    .primary-btn:hover { transform: translateY(-2px) scale(1.01); }
+
+    .secondary-btn {
+      color: var(--soft);
+      background: transparent;
+      border-color: var(--line);
+    }
+
+    .secondary-btn:hover { border-color: rgba(255,143,199,.55); }
+
+    .heart-logo {
+      width: 112px;
+      height: 112px;
+      margin: 0 auto 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 60px;
+      color: var(--pink);
+      background: radial-gradient(circle, rgba(255,95,168,.20), transparent 68%);
+      border: 1px solid var(--line);
+      animation: beat 1.35s infinite;
+    }
+
+    @keyframes beat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.09); }
+    }
+
+    .lock-card { width: min(500px, 100%); text-align: center; }
+
+    .lock-icon {
+      font-size: 42px;
+      margin-bottom: 15px;
+    }
+
+    .password-box {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0 10px;
+    }
+
+    .password-box input {
+      min-width: 0;
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 13px 15px;
+      color: white;
+      background: rgba(0,0,0,.25);
+      outline: none;
+    }
+
+    .password-box input:focus { border-color: rgba(255,143,199,.65); }
+    .error { min-height: 22px; color: #ff9fcf; font-size: 13px; }
+
+    .content { padding: 105px 18px 80px; }
+    .content-wrap { width: min(1100px, 100%); margin: 0 auto; }
+
+    .hero {
+      min-height: 80vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .hero-copy { max-width: 820px; margin: 0 auto; }
+
+    .typed {
+      min-height: 95px;
+      color: var(--soft);
+      font-size: clamp(16px, 2.2vw, 20px);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.1em;
+      background: var(--pink);
+      vertical-align: -2px;
+      margin-left: 2px;
+      animation: blink .8s infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    section { padding: 75px 0; }
+
+    .section-head { text-align: center; margin-bottom: 30px; }
+    .section-head p { max-width: 650px; margin: 0 auto; color: var(--muted); }
+
+    .terminal {
+      border: 1px solid var(--line);
+      background: #08060b;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 15px 55px rgba(0,0,0,.35);
+    }
+
+    .terminal-top {
+      padding: 11px 15px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .terminal-body {
+      padding: 22px;
+      line-height: 1.8;
+      overflow-x: auto;
+      font-size: 14px;
+    }
+
+    .token-key { color: #ba9cff; }
+    .token-string { color: #ff9dcb; }
+    .token-comment { color: #6f5c69; }
+    .token-good { color: #9ae6c4; }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .photo {
+      min-height: 330px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: linear-gradient(150deg, #2b172f, #140b18);
+      position: relative;
+    }
+
+    .photo img {
+      width: 100%;
+      height: 100%;
+      min-height: 330px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo::after {
+      content: "Your photo here";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,.38);
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(0,0,0,.30), transparent 50%);
+    }
+
+    .photo.has-image::after { content: ""; }
+
+    .timeline {
+      position: relative;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(transparent, rgba(255,143,199,.45), transparent);
+      transform: translateX(-50%);
+    }
+
+    .event {
+      width: 50%;
+      padding: 0 30px 40px 0;
+      position: relative;
+    }
+
+    .event:nth-child(even) { margin-left: 50%; padding: 0 0 40px 30px; }
+
+    .dot {
+      position: absolute;
+      top: 8px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--pink);
+      box-shadow: 0 0 18px rgba(255,95,168,.7);
+    }
+
+    .event:nth-child(odd) .dot { right: -6px; }
+    .event:nth-child(even) .dot { left: -6px; }
+
+    .event-card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .date { color: var(--pink); font-size: 12px; margin-bottom: 8px; letter-spacing: .08em; }
+
+    .final-panel { text-align: center; min-height: 70vh; display: grid; place-items: center; }
+
+    .question {
+      font-family: Georgia, serif;
+      font-size: clamp(38px, 7vw, 70px);
+      line-height: 1;
+      margin-bottom: 25px;
+    }
+
+    .answer-area {
+      position: relative;
+      width: min(650px, 100%);
+      min-height: 150px;
+      margin: 0 auto;
+    }
+
+    .yes-btn { margin-right: 10px; }
+    .no-btn { position: relative; }
+
+    .final-message {
+      margin-top: 30px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,95,168,.07);
+      animation: reveal .6s ease;
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(12px) scale(.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .footer {
+      text-align: center;
+      color: #7e6778;
+      padding: 35px 10px 5px;
+      font-size: 12px;
+    }
+
+    .reveal {
+      animation: reveal .7s ease both;
+    }
+
+    @media (max-width: 760px) {
+      .gallery { grid-template-columns: 1fr; }
+      .photo, .photo img { min-height: 260px; }
+      .timeline::before { left: 9px; transform: none; }
+      .event, .event:nth-child(even) {
+        width: 100%;
+        margin-left: 0;
+        padding: 0 0 28px 32px;
+      }
+      .event:nth-child(odd) .dot, .event:nth-child(even) .dot { left: 3px; right: auto; }
+      .password-box { flex-direction: column; }
+      .topbar { top: 12px; right: 12px; }
+    }
+  </style>
+</head>
+<body class="locked">
+  <div class="stars" id="stars"></div>
+  <div class="hearts-layer" id="heartsLayer"></div>
+
+  <div class="topbar hidden" id="topbar">
+    <button class="music-btn" id="musicBtn" type="button">Music: Off</button>
+  </div>
+
+  <!-- PASSWORD SCREEN -->
+  <div class="screen" id="lockScreen">
+    <div class="panel lock-card reveal">
+      <div class="lock-icon">♥</div>
+      <div class="eyebrow">private access</div>
+      <h2>This little place is for you.</h2>
+      <p class="subtext">There is one password. Use our anniversary in the format shown below.</p>
+
+      <div class="password-box">
+        <input id="passwordInput" type="password" inputmode="numeric" placeholder="DDMMYYYY" maxlength="8" autocomplete="off" />
+        <button class="primary-btn" id="unlockBtn" type="button">Unlock</button>
+      </div>
+      <div class="error" id="passwordError"></div>
+
+      <p style="font-size:12px; color:#765f70;">Example: 14 February 2025 → 14022025</p>
+    </div>
+  </div>
+
+  <!-- MAIN WEBSITE -->
+  <main class="app hidden" id="mainSite">
+    <div class="content">
+      <div class="content-wrap">
+
+        <section class="hero" id="home">
+          <div class="hero-copy">
+            <div class="heart-logo">♥</div>
+            <div class="eyebrow">system status: connected</div>
+            <h1>I made something for you.</h1>
+            <p class="typed" id="typedText"></p>
+            <span class="cursor"></span>
+            <div style="margin-top:25px;">
+              <button class="primary-btn" onclick="document.getElementById('story').scrollIntoView()">Open Our Story</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="story">
+          <div class="section-head">
+            <div class="eyebrow">01 / the code</div>
+            <h2>Why I built this</h2>
+            <p>Because writing "I love you" in a text box felt too ordinary.</p>
+          </div>
+
+          <div class="terminal">
+            <div class="terminal-top">our_relationship.js</div>
+            <div class="terminal-body">
+              <div><span class="token-key">const</span> relationship = {</div>
+              <div>&nbsp;&nbsp;person: <span class="token-string">"THE LOVE OF MY LIFE"</span>,</div>
+              <div>&nbsp;&nbsp;status: <span class="token-good">"CONNECTED"</span>,</div>
+              <div>&nbsp;&nbsp;love: <span class="token-string">"∞"</span>,</div>
+              <div>&nbsp;&nbsp;favoritePerson: <span class="token-string">"YOU"</span></div>
+              <div>};</div>
+              <br>
+              <div><span class="token-key">while</span> (we_are_together) {</div>
+              <div>&nbsp;&nbsp;makeMemories();</div>
+              <div>&nbsp;&nbsp;protect_each_other();</div>
+              <div>&nbsp;&nbsp;keep_laughing();</div>
+              <div>&nbsp;&nbsp;never_give_up();</div>
+              <div>}</div>
+              <br>
+              <div class="token-comment">// this program is intentionally designed to never end.</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="photos">
+          <div class="section-head">
+            <div class="eyebrow">02 / our memories</div>
+            <h2>A few of my favorite moments</h2>
+            <p>Replace the three image files in <code>assets</code> with your own photos.</p>
+          </div>
+
+          <div class="gallery">
+            <div class="photo" id="photo1"><img src="assets/photo1.jpg" alt="Our memory 1" onload="this.parentElement.classList.add('has-image')" onerror="this.style.display='none'" /></div>
+            <div class="photo" id="photo2"><img src="assets/photo2.jpg" alt="Our memory 2" onload="this.parentElement.classList.add('has-image')" onerror="this.style.display='none'" /></div>
+            <div class="photo" id="photo3"><img src="assets/photo3.jpg" alt="Our memory 3" onload="this.parentElement.classList.add('has-image')" onerror="this.style.display='none'" /></div>
+          </div>
+        </section>
+
+        <section id="timeline">
+          <div class="section-head">
+            <div class="eyebrow">03 / timeline</div>
+            <h2>Our little history</h2>
+            <p>Edit these dates and memories so they match your actual story.</p>
+          </div>
+
+          <div class="timeline">
+            <article class="event">
+              <span class="dot"></span>
+              <div class="event-card">
+                <div class="date">DAY 01</div>
+                <h3>The beginning</h3>
+                <p>Write how you first met, your first conversation, or the moment you realized there was something special here.</p>
+              </div>
+            </article>
+
+            <article class="event">
+              <span class="dot"></span>
+              <div class="event-card">
+                <div class="date">FIRST MEMORY</div>
+                <h3>The moment I remember</h3>
+                <p>Add a specific memory here. The more personal it is, the better this section feels.</p>
+              </div>
+            </article>
+
+            <article class="event">
+              <span class="dot"></span>
+              <div class="event-card">
+                <div class="date">OUR DAY</div>
+                <h3>The day we became us</h3>
+                <p>Put your anniversary date and what happened that day here.</p>
+              </div>
+            </article>
+
+            <article class="event">
+              <span class="dot"></span>
+              <div class="event-card">
+                <div class="date">TODAY</div>
+                <h3>Still choosing you</h3>
+                <p>And this is only one chapter. There is still a lot more for us to write.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="final">
+          <div class="panel final-panel">
+            <div>
+              <div class="eyebrow">04 / final question</div>
+              <div class="question">Will you stay with me?</div>
+              <p class="subtext">There is a very important answer required to complete this program.</p>
+
+              <div class="answer-area" id="answerArea">
+                <button class="primary-btn yes-btn" id="yesBtn" type="button">Yes. Obviously.</button>
+                <button class="secondary-btn no-btn" id="noBtn" type="button">No</button>
+              </div>
+
+              <div class="final-message hidden" id="finalMessage">
+                <h3>ACCESS GRANTED</h3>
+                <p style="margin-top:10px;">
+                  Congratulations. You have successfully chosen the correct answer.<br><br>
+                  I love you, and I would choose you again in every version of my life.<br><br>
+                  <span style="color:#ff8fc7;">while (you_and_me) { forever++; }</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="footer">Built from scratch with HTML, CSS, JavaScript, and a ridiculous amount of love.</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Replace this file with your own song. Browsers may block autoplay, so music starts after interaction. -->
+  <audio id="bgMusic" loop preload="auto">
+    <source src="assets/song.mp3" type="audio/mpeg" />
+  </audio>
+
+  <script>
+    /* =========================
+       EDIT THESE VALUES
+       ========================= */
+    const ANNIVERSARY_PASSWORD = "14022025";
+    const OPENING_MESSAGE =
+      "You are probably wondering why there is a website waiting for you. " +
+      "I could have sent you a message, but I wanted to make something that feels a little more like us.";
+
+    const stars = document.getElementById("stars");
+    const heartsLayer = document.getElementById("heartsLayer");
+    const lockScreen = document.getElementById("lockScreen");
+    const mainSite = document.getElementById("mainSite");
+    const topbar = document.getElementById("topbar");
+    const passwordInput = document.getElementById("passwordInput");
+    const passwordError = document.getElementById("passwordError");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const typedText = document.getElementById("typedText");
+    const music = document.getElementById("bgMusic");
+    const musicBtn = document.getElementById("musicBtn");
+
+    for (let i = 0; i < 95; i++) {
+      const star = document.createElement("span");
+      star.className = "star";
+      star.style.left = Math.random() * 100 + "vw";
+      star.style.top = Math.random() * 100 + "vh";
+      star.style.animationDelay = (Math.random() * 3) + "s";
+      stars.appendChild(star);
+    }
+
+    function spawnHeart() {
+      const heart = document.createElement("span");
+      heart.className = "floating-heart";
+      heart.textContent = Math.random() > 0.5 ? "♥" : "♡";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.fontSize = (12 + Math.random() * 18) + "px";
+      heart.style.setProperty("--drift", ((Math.random() - .5) * 180) + "px");
+      heart.style.animationDuration = (4.5 + Math.random() * 3) + "s";
+      heartsLayer.appendChild(heart);
+      setTimeout(() => heart.remove(), 8000);
+    }
+
+    setInterval(spawnHeart, 850);
+
+    function unlock() {
+      const value = passwordInput.value.trim();
+
+      if (value === ANNIVERSARY_PASSWORD) {
+        document.body.classList.remove("locked");
+        lockScreen.classList.add("hidden");
+        mainSite.classList.remove("hidden");
+        topbar.classList.remove("hidden");
+        startTyping();
+        document.getElementById("home").scrollIntoView();
+        tryMusic();
+      } else {
+        passwordError.textContent = "Wrong password. The date needs to be exactly right.";
+        passwordInput.animate([
+          { transform: "translateX(0)" },
+          { transform: "translateX(-6px)" },
+          { transform: "translateX(6px)" },
+          { transform: "translateX(0)" }
+        ], { duration: 220 });
+      }
+    }
+
+    function startTyping() {
+      if (typedText.dataset.started) return;
+      typedText.dataset.started = "true";
+      let i = 0;
+      function type() {
+        if (i < OPENING_MESSAGE.length) {
+          typedText.textContent += OPENING_MESSAGE[i];
+          i++;
+          setTimeout(type, 30);
+        }
+      }
+      type();
+    }
+
+    async function tryMusic() {
+      try {
+        await music.play();
+        musicBtn.textContent = "Music: On";
+      } catch {
+        musicBtn.textContent = "Music: Start";
+      }
+    }
+
+    unlockBtn.addEventListener("click", unlock);
+    passwordInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") unlock();
+    });
+
+    musicBtn.addEventListener("click", async () => {
+      if (music.paused) {
+        try {
+          await music.play();
+          musicBtn.textContent = "Music: On";
+        } catch {
+          musicBtn.textContent = "Add assets/song.mp3";
+        }
+      } else {
+        music.pause();
+        musicBtn.textContent = "Music: Off";
+      }
+    });
+
+    const noBtn = document.getElementById("noBtn");
+    const answerArea = document.getElementById("answerArea");
+
+    function moveNoButton() {
+      const area = answerArea.getBoundingClientRect();
+      const maxX = Math.max(0, area.width - noBtn.offsetWidth - 10);
+      const maxY = Math.max(0, area.height - noBtn.offsetHeight - 10);
+      noBtn.style.position = "absolute";
+      noBtn.style.left = Math.random() * maxX + "px";
+      noBtn.style.top = Math.random() * maxY + "px";
+    }
+
+    ["mouseenter", "touchstart", "click"].forEach(eventName => {
+      noBtn.addEventListener(eventName, (event) => {
+        if (eventName !== "click") event.preventDefault();
+        moveNoButton();
+      }, { passive: false });
+    });
+
+    document.getElementById("yesBtn").addEventListener("click", () => {
+      document.getElementById("finalMessage").classList.remove("hidden");
+      for (let i = 0; i < 35; i++) {
+        setTimeout(spawnHeart, i * 45);
+      }
+    });
+  </script>
+</body>
+</html>
